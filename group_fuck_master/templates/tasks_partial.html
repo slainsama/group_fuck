@@ -1,0 +1,27 @@
+<h2>任务列表 - {{ slave_ip }}:{{ slave_port }}</h2>
+{% if tasks %}
+    <table>
+        <thead>
+            <tr>
+                <th>任务 ID</th>
+                <th>时间</th>
+                <th>命令</th>
+                <th>是否完成</th>
+                <th>输出</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td>{{ task.Id }}</td>
+                <td>{{ task.Time }}</td>
+                <td>{{ task.CmdString }}</td>
+                <td>{{ '是' if task.IsFinish else '否' }}</td>
+                <td><pre>{{ task.Out }}</pre></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>该 Slave 没有任务。</p>
+{% endif %}

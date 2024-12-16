@@ -1,0 +1,9 @@
+server:
+  host: '127.0.0.1:8081'
+secure:
+  method: 'authKey'
+  authKey: 'test_key'
+  whiteList:
+    - "127.0.0.1"
+    - "0.0.0.0"
+  aesKey: 'c3853b88668d6794b81287099dd40ae9'

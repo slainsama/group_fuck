@@ -1,0 +1,117 @@
+# Python 缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 虚拟环境目录
+venv/
+env/
+ENV/
+venv.bak/
+venv_backup/
+.venv/
+
+# Flask 实例目录
+instance/
+*.sqlite3
+*.db
+
+# 环境变量文件
+.env
+
+# 日志文件
+*.log
+
+# IDE 配置文件
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# 操作系统元数据文件
+.DS_Store
+Thumbs.db
+
+# 测试覆盖率、缓存文件
+htmlcov/
+.tox/
+.pytest_cache/
+.coverage
+.cache
+
+# Jupyter Notebook 检查点
+.ipynb_checkpoints/
+
+# 类型检查缓存
+.mypy_cache/
+.pytype/
+.pyre/
+
+# 临时文件
+*.swp
+*.swo
+*~
+
+# 打包 / 分发
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+share/python-wheels/
+pip-wheel-metadata/
+
+# 安装器日志
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Sphinx 文档
+docs/_build/
+
+# PyInstaller
+*.spec
+
+# Cython 调试符号
+cython_debug/
+
+# 单元测试结果
+.junit/
+
+# 项目配置文件
+*.tmproj
+
+# Environments
+.env/
+.env.bak/
+.envrc
+
+# 安全文件
+*.pem
+*.key
+*.crt
+
+# 本地配置文件
+local_settings.py
+
+# Celery beat schedule 文件
+celerybeat-schedule
+
+# 缓存文件
+*.cache
+
+# Rust/Cargo
+target/
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# tox
+.tox/
+
+# 其他
+*.bak
+*.orig
+*.rej

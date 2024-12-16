@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Slave Management</title>
+    <style>
+        /* 基础样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        /* 表格样式 */
+        table {
+            width: 80%;
+            margin: 0 auto 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        /* 按钮样式 */
+        .button-group {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .add-btn, .execute-btn, .tasks-btn {
+            display: inline-block;
+            width: 200px;
+            margin: 10px;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+        }
+        .execute-btn {
+            background-color: #17a2b8;
+        }
+        .tasks-btn {
+            background-color: #ffc107;
+        }
+        .add-btn:hover {
+            background-color: #218838;
+        }
+        .execute-btn:hover {
+            background-color: #138496;
+        }
+        .tasks-btn:hover {
+            background-color: #e0a800;
+        }
+        /* 侧边栏样式 */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #ffffff;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+        .sidebar form {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .sidebar input[type="text"],
+        .sidebar input[type="number"],
+        .sidebar textarea {
+            margin-bottom: 15px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .sidebar input[type="submit"] {
+            padding: 10px;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .sidebar input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 36px;
+            cursor: pointer;
+        }
+        /* 底部弹窗样式 */
+        .bottom-popup {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background-color: #ffffff;
+            overflow-y: auto;
+            transition: 0.5s;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
+            z-index: 3;
+            padding: 20px;
+        }
+        .bottom-popup.open {
+            bottom: 0;
+        }
+        .bottom-popup .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 36px;
+            cursor: pointer;
+        }
+        /* 遮罩层 */
+        #overlay {
+            position: fixed;
+            display: none;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1;
+        }
+        /* 选择框 */
+        .checkbox {
+            transform: scale(1.2);
+        }
+        /* 查看任务按钮 */
+        .view-tasks-btn {
+            padding: 6px 12px;
+            background-color: #ffc107;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .view-tasks-btn:hover {
+            background-color: #e0a800;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <nav style="background-color: #007BFF; color: white; padding: 10px; text-align: right;">
+        <span>欢迎，{{ USERNAME }}</span>
+        <a href="{{ url_for('logout') }}" style="color: white; margin-left: 20px; text-decoration: none;">登出</a>
+    </nav>
+    <div id="overlay"></div>
+    <!-- 添加 Slave 的侧边栏 -->
+    <div class="sidebar" id="addSidebar">
+        <a href="javascript:void(0)" class="close-btn" onclick="closeAddSidebar()">&times;</a>
+        <form action="{{ url_for('add_slave') }}" method="post">
+            <h2 style="text-align:center;">添加 Slave</h2>
+            <input type="text" name="ip" placeholder="IP 地址" required>
+            <input type="number" name="port" placeholder="端口" required>
+            <input type="text" name="method" placeholder="方法" required>
+            <input type="text" name="auth_key" placeholder="认证密钥" required>
+            <input type="text" name="aeskey" placeholder="AES 密钥" required>
+            <input type="submit" value="添加 Slave">
+        </form>
+    </div>
+    <!-- 执行 Shell 的侧边栏 -->
+    <div class="sidebar" id="execSidebar">
+        <a href="javascript:void(0)" class="close-btn" onclick="closeExecSidebar()">&times;</a>
+        <form action="{{ url_for('execute_shell') }}" method="post">
+            <h2 style="text-align:center;">执行 Shell</h2>
+            <p>选择要执行的 Slaves：</p>
+            <div style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
+                {% for slave in slaves %}
+                {% set idx = loop.index0 %}
+                <label>
+                    <input type="checkbox" class="checkbox" name="selected_slaves" value="{{ idx }}">
+                    {{ slave[0] }}:{{ slave[1] }}
+                </label><br>
+                {% endfor %}
+            </div>
+            <textarea name="command" placeholder="请输入要执行的命令" rows="5" required></textarea>
+            <input type="submit" value="执行命令">
+        </form>
+    </div>
+    <!-- 底部弹窗，显示任务 -->
+    <div class="bottom-popup" id="tasksPopup">
+        <span class="close-btn" onclick="closeTasksPopup()">&times;</span>
+        <div id="tasksContent">
+            <!-- 动态加载的任务内容 -->
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Slave 列表</h1>
+        <div class="button-group">
+            <button class="add-btn" onclick="openAddSidebar()">添加 Slave</button>
+            <button class="execute-btn" onclick="openExecSidebar()">执行 Shell</button>
+        </div>
+        {% if slaves %}
+        <table>
+            <tr>
+                <th>IP 地址</th>
+                <th>端口</th>
+                <th>操作</th>
+            </tr>
+            {% for slave in slaves %}
+            {% set idx = loop.index0 %}
+            <tr>
+                <td>{{ slave[0] }}</td>
+                <td>{{ slave[1] }}</td>
+                <td>
+                    <button class="view-tasks-btn" onclick="viewTasks({{ idx }})">查看任务</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p style="text-align: center;">暂无 Slave 数据。</p>
+        {% endif %}
+    </div>
+
+    <script>
+        // 添加 Slave 的侧边栏控制
+        function openAddSidebar() {
+            document.getElementById("addSidebar").style.width = "350px";
+            document.getElementById("overlay").style.display = "block";
+        }
+
+        function closeAddSidebar() {
+            document.getElementById("addSidebar").style.width = "0";
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        // 执行 Shell 的侧边栏控制
+        function openExecSidebar() {
+            document.getElementById("execSidebar").style.width = "350px";
+            document.getElementById("overlay").style.display = "block";
+        }
+
+        function closeExecSidebar() {
+            document.getElementById("execSidebar").style.width = "0";
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        // 点击遮罩层关闭侧边栏和弹窗
+        document.getElementById('overlay').addEventListener('click', function() {
+            closeAddSidebar();
+            closeExecSidebar();
+            closeTasksPopup();
+        });
+
+        // 查看任务弹窗控制
+        function viewTasks(slaveIndex) {
+            fetch(`/get_tasks/${slaveIndex}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    } else {
+                        return Promise.reject('Failed to load tasks');
+                    }
+                })
+                .then(html => {
+                    document.getElementById('tasksContent').innerHTML = html;
+                    document.getElementById('tasksPopup').classList.add('open');
+                    document.getElementById('overlay').style.display = 'block';
+                })
+                .catch(error => {
+                    alert(error);
+                });
+        }
+
+        function closeTasksPopup() {
+            document.getElementById('tasksPopup').classList.remove('open');
+            document.getElementById('overlay').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
